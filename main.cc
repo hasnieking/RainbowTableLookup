@@ -83,22 +83,15 @@ void printline(string line, string toSearch, string replaceStr)
 //compares hashes
 bool compare(string leakhash, string rainbowline, int hashlenght) {
     string rainbowhash = rainbowline.substr(0,hashlenght); //get hash from leak
-    cout << leakhash << 'L' << endl;
-    cout << rainbowhash << 'R' << endl;
-    if(leakhash.compare(rainbowhash) == 0) {
-        cout << "EINDELIJK!!" << endl;
-        return true;
-    } else {
-        return false;
-    }
-    //return (leakhash.compare(rainbowhash) == 0); //compare the hashes
+
+    return (leakhash.compare(rainbowhash) == 0); //compare the hashes
 }
 
+//gets the plaintext password once hashes are the same
 string getplaintext(char fsrainbow, int col, string line) {
     string plaintext;
     plaintext = linetostring(fsrainbow, col, line);
 
-    cout << plaintext << endl;
     return plaintext;
 }
 
@@ -114,14 +107,15 @@ void leakedloop(string leakname, string rainbowname, int passwordcol, int hashle
     getline(leak, leakline); //test for data
     while (!leak.eof()) {
         leakhash = linetostring(fsleak, passwordcol, leakline);
+        leakhash.pop_back();
         getline(rainbow, rainbowline); //test for data
         while (!rainbow.eof()) {
-            if(compare(leakhash, rainbowline, hashlenght)) {
-                plaintext = getplaintext(fsrainbow, plaincol, rainbowline);
-                printline(leakline, leakhash, plaintext);
+            if(compare(leakhash, rainbowline, hashlenght)) { //if the hashes are the same print
+                plaintext = getplaintext(fsrainbow, plaincol, rainbowline); //get plaintext pw
+                printline(leakline, leakhash, plaintext); //print
                 break;
             } else {
-                getline(rainbow, rainbowline);
+                getline(rainbow, rainbowline); //get next hash
             }
         }
         //go back to the top of the rainbow file
