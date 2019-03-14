@@ -44,20 +44,54 @@ void fieldseperator(char &fs) {
     }
 }
 
+//gets the hash from the leaked file
+string leaktohash(char fs, int col, string line) {
+    int fscounter = 0; //counts field seperators
+    char currentchar; //char that gets copied or tested
+    string hash;
+
+    for (unsigned int i = 0; i < line.length(); i++) {
+        currentchar = line[i];
+        if (fscounter == (col - 1)) {
+            if (currentchar != fs) {
+                hash.push_back(currentchar);
+            }
+        }
+        //count field seperators
+        if (currentchar == fs) {
+            fscounter++;
+        }
+    }
+    return hash;
+}
+
+//compares hashes
+bool compare(string leakhash, string rainbowline, int hashlenght) {
+    string rainbowhash = rainbowline.substr(0,hashlenght); //get hash from leak
+    return (leakhash.compare(rainbowhash) == 0); //compare the hashes
+}
+
+//double loop that tests every value in the rainbow table
 void leakedloop(string leakname, string rainbowname, int passwordcol, int hashlenght, int plaincol, char fsleak, char fsrainbow) {
     string leakline, rainbowline; //current line
+    string leakhash; //leaked hash
     ifstream leak(leakname.c_str(), ios::in); //leaked file
     ifstream rainbow(rainbowname.c_str(), ios::in); //rainbow table
 
     //the loop
     getline(leak, leakline); //test for data
     while (!leak.eof()) {
-        cout << leakline << endl;
+        leakhash = leaktohash(fsleak, passwordcol, leakline);
         getline(rainbow, rainbowline); //test for data
         while (!rainbow.eof()) {
-            cout << rainbowline << endl;
-            getline(rainbow, rainbowline);
+            if(compare(leakhash, rainbowline, hashlenght)) {
+                //printline(leakline, rainbowline);
+                break;
+            } else {
+                getline(rainbow, rainbowline);
+            }
         }
+        //go back to the top of the rainbow file
         rainbow.clear();
         rainbow.seekg(0, ios::beg);
         getline(leak, leakline);
@@ -72,6 +106,7 @@ int main() {
 
     //info
     cout << "Hash to password rainbow table lookup" << endl;
+    cout << "Prints data from original files of found hashes and replaces it with plain text." << endl;
     cout << "Make sure the hash is stored as the first field in the rainbow table." << endl << endl;
 
     //ask questions
